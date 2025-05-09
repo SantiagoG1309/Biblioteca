@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Gráficas de Libros{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <!-- Lista de autores (lado derecho) -->
+        <div class="col-md-3 order-md-2 mb-4">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">Ranking de Autores</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        {% for autor in datos_autores %}
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>{{ forloop.counter }}. {{ autor.nombre }}</span>
+                                <span class="badge bg-primary rounded-pill">{{ autor.total_libros }}</span>
+                            </div>
+                        {% empty %}
+                            <div class="list-group-item text-center">
+                                <p>No hay autores registrados</p>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contenido principal (lado izquierdo) -->
+        <div class="col-md-9 order-md-1">
+            <h2 class="text-center mb-4">Estadísticas de Libros</h2>
+            <div class="row">
+                <!-- Gráfica de Libros por Autor -->
+                <div class="col-md-6 mb-4">
+                    <div class="card shadow">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="card-title mb-0">Libros por Autor</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="graficoAutores"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gráfica de Libros por Categoría -->
+                <div class="col-md-6 mb-4">
+                    <div class="card shadow">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="card-title mb-0">Libros por Categoría</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="graficoCategorias"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Incluir Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    // Datos que serán reemplazados por la vista
+    const datosAutores = {{ datos_autores_json|safe }};
+    const datosCategorias = {{ datos_categorias|safe }};
+
+    // Ordenar datosAutores por total_libros descendente (por seguridad)
+    datosAutores.sort((a, b) => b.total_libros - a.total_libros);
+
+    // Configuración de colores
+    const colores = [
+        '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
+        '#FF9F40', '#FF6384', '#C9CBCF', '#4BC0C0', '#FF9F40'
+    ];
+
+    // Gráfico de Autores
+    new Chart(document.getElementById('graficoAutores'), {
+        type: 'bar',
+        data: {
+            labels: datosAutores.map(item => item.nombre),
+            datasets: [{
+                label: 'Número de Libros',
+                data: datosAutores.map(item => item.total_libros),
+                backgroundColor: colores,
+                borderColor: colores,
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                title: {
+                    display: true,
+                    text: 'Distribución de Libros por Autor'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            }
+        }
+    });
+
+    // Gráfico de Categorías
+    new Chart(document.getElementById('graficoCategorias'), {
+        type: 'pie',
+        data: {
+            labels: datosCategorias.map(item => item.nombre),
+            datasets: [{
+                data: datosCategorias.map(item => item.total_libros),
+                backgroundColor: colores,
+                borderColor: colores,
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'right'
+                },
+                title: {
+                    display: true,
+                    text: 'Distribución de Libros por Categoría'
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}
