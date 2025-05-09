@@ -1,4 +1,4 @@
-// Variables globales
+// Variables globales y utilidades
 const debounce = (func, delay) => {
     let timeout;
     return (...args) => {
@@ -7,10 +7,43 @@ const debounce = (func, delay) => {
     };
 };
 
-// Mostrar mensajes con animación mejorada
+// Animaciones suaves para elementos
+const fadeIn = (element, duration = 400) => {
+    element.style.opacity = 0;
+    element.style.transition = `opacity ${duration}ms ease`;
+    requestAnimationFrame(() => {
+        element.style.opacity = 1;
+    });
+};
+
+const slideIn = (element, direction = 'left', duration = 400) => {
+    const offset = direction === 'left' ? -20 : 20;
+    element.style.transform = `translateX(${offset}px)`;
+    element.style.opacity = 0;
+    element.style.transition = `all ${duration}ms ease`;
+    requestAnimationFrame(() => {
+        element.style.transform = 'translateX(0)';
+        element.style.opacity = 1;
+    });
+};
+
+// Mostrar mensajes con animación mejorada y estilo elegante
 const showMessage = (message, type = 'info') => {
     const alertDiv = document.createElement('div');
-    alertDiv.className = `alert alert-${type} fade-in`;
+    alertDiv.className = `alert alert-${type}`;
+    alertDiv.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        background: var(--dark-text);
+        color: white;
+        box-shadow: var(--shadow-md);
+        z-index: 1050;
+        opacity: 0;
+        transform: translateY(-10px);
+    `;
     alertDiv.innerHTML = `<i class="fas fa-info-circle"></i> ${message}`;
 
     const container = document.querySelector('.container');
@@ -27,10 +60,12 @@ const showMessage = (message, type = 'info') => {
     }
 };
 
-// Validación visual de formularios con feedback
+// Validación visual mejorada de formularios con feedback elegante
 const enhanceFormValidation = () => {
     const forms = document.querySelectorAll('form');
     forms.forEach(form => {
+        form.style.transition = 'all 0.4s ease';
+        fadeIn(form);
         const inputs = form.querySelectorAll('input, textarea, select');
         inputs.forEach(input => {
             input.addEventListener('focus', () => {
